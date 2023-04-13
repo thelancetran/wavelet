@@ -5,16 +5,33 @@ import java.util.ArrayList;
 class Handler implements URLHandler {
     // The one bit of state on the server: a number that will be manipulated by
     // various requests.
-    ArrayList<String> list = new ArrayList<>();
+    ArrayList<String> list = new ArrayList<>(5);
+    String to_Print = "";
+    String[] parameters;
 
     public String handleRequest(URI url) {
         if (url.getPath().equals("/")) {
-            return String.format("Lance's List: %d", list);
+            for(String s: list) {
+                to_Print = to_Print + s + " ";
+            }
+            return String.format("Lance's List: " + to_Print);
         }
-        else {
+        else if (url.getPath().contains("/search")) {
+            parameters = url.getQuery().split("=");
+            if (parameters[0].equals("s")) {
+                String isContained = "";
+                for(String s: list) {
+                    if (s.indexOf(parameters[1]) != -1) {
+                        isContained = isContained + s + " ";
+                    }
+                }
+                return String.format(isContained);
+            }
+            return String.format("Try /search?s=...");
+        } else {
             System.out.println("Path: " + url.getPath());
             if (url.getPath().contains("/add")) {
-                String[] parameters = url.getQuery().split("=");
+                parameters = url.getQuery().split("=");
                 if (parameters[0].equals("s")) {
                     list.add(parameters[1]);
                     return String.format("%s has been added", parameters[1]);
